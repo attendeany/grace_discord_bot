@@ -14,7 +14,7 @@ RUN apt update && apt install -y git && \
  apt remove -y git
 
 # copy bot source code
-COPY echo_bot echo_bot
+COPY grace_bot grace_bot
 
 # copy main source file
 COPY main.py .
