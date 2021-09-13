@@ -8,11 +8,33 @@ import discord
 from grace_bot.application_commands import guild_app_commands_payload
 
 log = logging.getLogger('grace_bot')
-messages_per_level = 5
+messages_per_level = 20
+
+
+class SourceCodeView(discord.ui.View):
+    def __init__(self):
+        super().__init__()
+        self.add_item(discord.ui.Button(
+            style=discord.ButtonStyle.url, label='My Source Code',
+            url='https://github.com/attendeany/grace_discord_bot'))
+
 
 hello_message = {
-    'content': 'Hello',
-    'embed': discord.Embed(description='Ahhh!')
+    'content': '<a:cat_hug:857325421920780338> Добрый день, меня зовут Grace. '
+               'Я являюсь тестовым заданием и вот мои возможности:',
+    'embed': discord.Embed(color=discord.Color.green()).add_field(
+        name='1. Events', inline=False,
+        value='Отслеживаю подключение юзера к каналу и вывожу информацию в доступный текстовый канал').add_field(
+        name='2. Commands', inline=False,
+        value='Имею команду **/help**, для отображения этого сообщения').add_field(
+        name='3. Kick / Ban / Unban', inline=False,
+        value='Могу кикать/банить участников через команды **/kick, /ban** или через контекстное меню '
+              '**Kick User, Ban User**. Разбанить пользователя можно с помощью **/unban**. '
+              'Никнейм забаненного пользователя можно получить из списка банов.').add_field(
+        name='4. Level system', inline=False,
+        value=f'Каждые {messages_per_level} сообщений у пользователя повышается внутрисерверный уровень.').set_footer(
+        text='Мой исходный код был написан в очень сжатые сроки, и может содержать некоторые допущения, '
+             'однако я могу совершенствоваться стать ещё лучше :3')
 }
 
 
@@ -27,7 +49,7 @@ async def KickMember(guild: discord.Guild, member_id, reason=None):
     except discord.HTTPException:
         log.exception(f'Cannot kick user from {guild} with {member_id=}')
     else:
-        return f'Пользователь <@{member_id}> выгнан.'
+        return f'Пользователь <@{member_id}> изгнан.'
 
     return 'Что-то пошло не так'
 
@@ -198,7 +220,7 @@ class GraceBot:
         return False
 
     async def SaveLoop(self):
-        log.info('Starging save loop')
+        log.debug('Starting save loop')
         while True:
             await asyncio.sleep(60)
             self.database.Save(self.user_activity)
@@ -235,13 +257,13 @@ class GraceBot:
         log.info(f"Got {command_name} {interaction.guild} application command")
 
         if command_name == 'help':
-            await interaction.response.send_message(**hello_message)
+            await interaction.response.send_message(view=SourceCodeView(), **hello_message)
             return
 
         require_perm = ''
         if command_name in ('kick', 'Kick User') and not interaction.permissions.kick_members:
             require_perm = 'выгонять участников'
-        elif command_name in ('ban', 'Ban User') and not interaction.permissions.ban_members:
+        elif command_name in ('ban', 'Ban User', 'unban') and not interaction.permissions.ban_members:
             require_perm = 'банить участников'
 
         if require_perm:

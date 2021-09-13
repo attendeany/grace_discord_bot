@@ -5,7 +5,7 @@ import sys
 import discord
 from grace_bot.grace import GraceBot
 
-log_level = logging.DEBUG
+log_level = logging.INFO
 
 log = logging.getLogger('grace_bot')
 log.setLevel(log_level)
@@ -32,16 +32,12 @@ if __name__ == '__main__':
         read_messages=True,
         send_messages=True,
         embed_links=True,
-        attach_files=True,
         read_message_history=True,
         external_emojis=True,
         send_messages_in_threads=True,
         kick_members=True,
         ban_members=True
     )
-
-    log.info(
-        f"Oauth url: {discord.utils.oauth_url(str(886928397446545459), permissions=permissions, scopes=('bot', 'applications.commands'))}")
 
     bot_token = os.getenv('token')
     if not bot_token:
@@ -55,6 +51,7 @@ if __name__ == '__main__':
     @client.event
     async def on_ready():
         log.info(f'Logged as {client.user}')
+        log.info(f"OAuth url: {discord.utils.oauth_url(str(client.user.id), permissions=permissions, scopes=('bot', 'applications.commands'))}")
         await bot_logic.OnReady()
 
     @client.event
